@@ -1,6 +1,7 @@
 "use client";
 
 import { Layout } from "@/components/layout/Layout";
+import LandingPage from "@/components/landing/LandingPage";
 import { AIConfidenceBadge } from "@/components/ui/AIConfidenceBadge";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -167,19 +168,17 @@ function isEligibleForProgram(employee: (typeof mockEmployees)[number], programT
   }
 }
 
-export default function DashboardPage() {
+function DashboardPage() {
   const { currentUser, isAuthenticated, hasHydrated } = useAppStore();
   const router = useRouter();
 
   useEffect(() => {
     if (hasHydrated) {
-      if (!isAuthenticated) {
-        router.replace("/login");
-      } else if (currentUser?.role === "manager") {
+      if (currentUser?.role === "manager") {
         router.replace("/approvals");
       }
     }
-  }, [isAuthenticated, hasHydrated, currentUser, router]);
+  }, [hasHydrated, currentUser, router]);
 
   const [dismissedRecs, setDismissedRecs] = useState<string[]>([]);
   const [readNotifs] = useState<string[]>([]);
@@ -653,4 +652,25 @@ export default function DashboardPage() {
       </div>
     </Layout>
   );
+}
+
+export default function Home() {
+  const { isAuthenticated, hasHydrated } = useAppStore();
+
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <span className="text-sm text-muted-foreground">Checking authentication...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <DashboardPage />;
+  }
+
+  return <LandingPage />;
 }

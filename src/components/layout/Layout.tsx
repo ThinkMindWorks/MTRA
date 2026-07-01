@@ -111,6 +111,7 @@ export function Layout({
   useEffect(() => {
     if (hasHydrated) {
       if (!isAuthenticated) {
+        if (pathname === "/") return;
         const searchStr = typeof window !== "undefined" ? window.location.search : "";
         const fullPath = pathname ? `${pathname}${searchStr}` : "";
         const queryParam = fullPath && fullPath !== "/" ? `?redirect=${encodeURIComponent(fullPath)}` : "";
@@ -139,7 +140,7 @@ export function Layout({
 
   const handleLogout = () => {
     logout();
-    router.push("/");
+    router.push("/login");
   };
 
   const [isMobile, setIsMobile] = useState(false);
