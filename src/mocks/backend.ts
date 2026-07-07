@@ -93,7 +93,7 @@ export const mockBackend: backendInterface = {
   getPrograms: async () => [
     {
       id: "prog-tuition",
-      name: "Tuition Reimbursement",
+      name: "Employee Tuition Reimbursement",
       description: "Annual tuition reimbursement up to $5,250 for eligible degree programs at accredited institutions.",
       maxAmount: 5250,
       maxCredits: BigInt(18),
@@ -106,7 +106,7 @@ export const mockBackend: backendInterface = {
     },
     {
       id: "prog-cme",
-      name: "CME Reimbursement",
+      name: "Continuing Medical Education (CME) Reimbursement for Physician Assistants and Weiler Physical Therapists",
       description: "Continuing Medical Education reimbursement for clinical staff certification and recertification.",
       maxAmount: 2000,
       maxCredits: BigInt(0),
@@ -118,7 +118,7 @@ export const mockBackend: backendInterface = {
     },
     {
       id: "prog-mmc",
-      name: "MMC Scholarship",
+      name: "Scholarship Program for Children of MMC Employees",
       description: "Merit-based scholarship for outstanding Montefiore employees pursuing advanced healthcare degrees.",
       maxAmount: 10000,
       maxCredits: BigInt(18),
@@ -131,7 +131,7 @@ export const mockBackend: backendInterface = {
     },
     {
       id: "prog-dependent",
-      name: "Dependent Tuition",
+      name: "Tuition Reimbursement for Children of Physicians, Scientists and Executives",
       description: "Tuition assistance for eligible dependents of Montefiore employees at accredited institutions.",
       maxAmount: 3000,
       maxCredits: BigInt(0),

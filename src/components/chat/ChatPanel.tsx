@@ -188,7 +188,7 @@ export function ChatPanel() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your question..."
-                className="w-full bg-muted/30 border border-border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
+                className="w-full bg-slate-50 border border-border text-slate-800 rounded-xl px-4 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all placeholder:text-muted-foreground"
               />
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/30 pointer-events-none" />
             </div>

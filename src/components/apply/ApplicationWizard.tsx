@@ -132,7 +132,7 @@ function WizardProgress({ step }: { step: number }) {
   return (
     <div className="sticky top-0 z-10 w-full bg-background/80 backdrop-blur-md border-b border-border px-4 py-2 md:px-6 md:py-2.5">
       {/* Desktop View */}
-      <div className="hidden md:flex items-start justify-center gap-0 overflow-x-auto no-scrollbar">
+      <div className="hidden md:flex items-start justify-center gap-0 overflow-x-auto no-scrollbar py-1.5">
         {STEP_LABELS.map((label, idx) => {
           const stepNum = idx + 1;
           const isCompleted = step > stepNum;

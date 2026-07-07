@@ -153,7 +153,7 @@ export const mockPrograms: Program[] = [
   {
     id: "prog-001",
     programType: "TuitionReimbursement",
-    name: "Tuition Reimbursement",
+    name: "Employee Tuition Reimbursement",
     description:
       "Up to $5,000/year for accredited degree programs. Covers tuition, fees, and required textbooks for job-related coursework.",
     maxAmount: 5000,
@@ -172,7 +172,7 @@ export const mockPrograms: Program[] = [
   {
     id: "prog-002",
     programType: "CMEReimbursement",
-    name: "CME Reimbursement",
+    name: "Continuing Medical Education (CME) Reimbursement for Physician Assistants and Weiler Physical Therapists",
     description:
       "Continuing Medical Education reimbursement for licensed clinical staff. Covers registration, travel, and materials.",
     maxAmount: 2500,
@@ -190,7 +190,7 @@ export const mockPrograms: Program[] = [
   {
     id: "prog-003",
     programType: "MMCScholarship",
-    name: "MMC Scholarship",
+    name: "Scholarship Program for Children of MMC Employees",
     description:
       "Montefiore Medical Center merit-based scholarship for exceptional employees pursuing advanced degrees in healthcare.",
     maxAmount: 10000,
@@ -209,7 +209,7 @@ export const mockPrograms: Program[] = [
   {
     id: "prog-004",
     programType: "DependentTuition",
-    name: "Dependent Tuition",
+    name: "Tuition Reimbursement for Children of Physicians, Scientists and Executives",
     description:
       "Tuition assistance for eligible dependents attending accredited institutions. Available to employees with 5+ years of service.",
     maxAmount: 3000,

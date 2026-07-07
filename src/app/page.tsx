@@ -283,126 +283,153 @@ function DashboardPage() {
 
   const hour = new Date().getHours();
   const greeting =
-    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";  return (
+    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  return (
     <Layout title="Overview" breadcrumbs={[{ label: "Overview" }]}>
       <div
         className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto bg-white"
         data-ocid="dashboard.page"
       >
+        {/* Banner (Full Width) */}
+        <div className="bg-gradient-to-r from-[#003769] via-[#005f7c] to-[#009480] rounded-[1.25rem] p-6 sm:p-8 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 shadow-md relative overflow-hidden select-none border border-white/15">
+          {/* Subtle background glow graphics */}
+          <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white/5 blur-3xl pointer-events-none"></div>
+          <div className="absolute -left-10 -bottom-10 w-60 h-60 rounded-full bg-teal-500/10 blur-3xl pointer-events-none"></div>
+          
+          <div className="relative z-10">
+            <h1 className="text-xl sm:text-2xl font-bold font-display text-white tracking-wide">
+              Welcome to the HealthyME Tuition Portal
+            </h1>
+          </div>
+
+          <button
+            onClick={() => router.push("/apply")}
+            className="bg-white text-[#008573] hover:bg-white/95 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-full px-6 py-2.5 text-xs sm:text-sm font-bold shadow-md shrink-0 tracking-[0.01em] font-body relative z-10"
+          >
+            Apply Now
+          </button>
+        </div>
+
+        {/* Stats Cards Row (Full Width) */}
+        <div className={`grid grid-cols-1 gap-4 ${
+          isNysna 
+            ? "sm:grid-cols-2 lg:grid-cols-4" 
+            : "sm:grid-cols-3"
+        }`}>
+          {/* Tuition Balance */}
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all rounded-2xl bg-white">
+            <CardContent className="p-4 flex items-center gap-4 h-full">
+              <ProgressRing
+                value={employee.tuitionUsed}
+                max={employee.tuitionMax}
+                size={64}
+                strokeWidth={6}
+                color="primary"
+                valueDisplay={formatCurrency(employee.tuitionBalance)}
+                sublabel="left"
+                label="Tuition Balance"
+              />
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="text-xs font-bold text-slate-800 font-body">
+                  Annual budget
+                </div>
+                <div className="text-sm font-black text-[#003769] font-body leading-none">
+                  {formatCurrency(employee.tuitionMax)}/yr
+                </div>
+                <div className="text-xs font-medium text-slate-500 font-body">
+                  {formatCurrency(employee.tuitionUsed)} used
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Credit Balance (NYSNA only) */}
+          {isNysna && (
+            <Card className="border border-border shadow-sm hover:shadow-md transition-all rounded-2xl bg-white">
+              <CardContent className="p-4 flex items-center gap-4 h-full">
+                <ProgressRing
+                  value={employee.creditUsed}
+                  max={employee.creditMax}
+                  size={64}
+                  strokeWidth={6}
+                  color="accent"
+                  valueDisplay={`${employee.creditBalance}`}
+                  sublabel="left"
+                  label="Credit Balance"
+                />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="text-xs font-bold text-slate-800 font-body">
+                    Credit limit
+                  </div>
+                  <div className="text-sm font-black text-[#003769] font-body leading-none">
+                    {employee.creditMax} credits/yr
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 font-body">
+                    {employee.creditUsed} used
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Active Applications */}
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all rounded-2xl bg-white">
+            <CardContent className="p-4 flex flex-col justify-between h-full min-h-[100px]">
+              <div className="flex items-center justify-between gap-3 w-full">
+                <div className="text-xs font-bold text-slate-800 font-body">
+                  Active Applications
+                </div>
+                <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4 text-purple-600" />
+                </div>
+              </div>
+              <div className="mt-2 space-y-1 text-left">
+                <div className="text-2xl font-black font-body text-[#003769] leading-none">
+                  {activeApps.length}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0 animate-pulse" />
+                  {activeStatusBreakdown.length > 0 ? (
+                    <span>Pending Approval: {activeApps.length}</span>
+                  ) : (
+                    <span>{myApps.length} total submitted</span>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Reimbursed */}
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all rounded-2xl bg-white">
+            <CardContent className="p-4 flex flex-col justify-between h-full min-h-[100px]">
+              <div className="flex items-center justify-between gap-3 w-full">
+                <div className="text-xs font-bold text-slate-800 font-body">
+                  Total Reimbursed
+                </div>
+                <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                </div>
+              </div>
+              <div className="mt-2 space-y-1 text-left">
+                <div className="text-2xl font-black font-body text-[#003769] leading-none">
+                  {formatCurrency(ytdReimbursed)}
+                </div>
+                <div className="text-xs font-medium text-slate-500 font-body">
+                  YTD · {approvedApps.length} approved
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Two-Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start bg-white">
           
           {/* Left Column (Covers 2/3 width) */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Greeting */}
-            <h2 className="text-xl font-bold font-display text-[#003769]">
-              Good morning, {employee.name.split(" ")[0]}.
-            </h2>
-
-            {/* Stats Cards Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Tuition Balance (Non-NYSNA only) */}
-              {!isNysna && (
-                <Card className="border-2 border-[#003769] shadow-sm hover:shadow-md transition-all rounded-none bg-white">
-                  <CardContent className="p-3 flex items-center gap-2">
-                    <ProgressRing
-                      value={employee.tuitionUsed}
-                      max={employee.tuitionMax}
-                      size={52}
-                      color="primary"
-                      valueDisplay={formatCurrency(employee.tuitionBalance)}
-                      sublabel="left"
-                      label="Tuition Balance"
-                    />
-                    <div className="min-w-0">
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">
-                        Tuition Balance
-                      </div>
-                      <div className="text-xs font-bold text-foreground">
-                        Annual Budget: {formatCurrency(employee.tuitionMax)}/yr
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {formatCurrency(employee.tuitionUsed)} used
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Credit Balance (NYSNA only) */}
-              {isNysna && (
-                <Card className="border-2 border-[#003769] shadow-sm hover:shadow-md transition-all rounded-none bg-white">
-                  <CardContent className="p-3 flex items-center gap-2">
-                    <ProgressRing
-                      value={employee.creditUsed}
-                      max={employee.creditMax}
-                      size={52}
-                      color="primary"
-                      valueDisplay={`${employee.creditBalance}`}
-                      sublabel="left"
-                      label="Credit Balance"
-                    />
-                    <div className="min-w-0">
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-0.5">
-                        Credit Balance
-                      </div>
-                      <div className="text-xs font-bold text-foreground">
-                        Credit Limit: {employee.creditMax} credits/yr
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {employee.creditUsed} used
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Active Applications */}
-              <Card className="border-2 border-[#003769] shadow-sm hover:shadow-md transition-all rounded-none bg-white">
-                <CardContent className="p-3 flex flex-col justify-between h-full min-h-[80px]">
-                  <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">
-                    Active Applications
-                  </div>
-                  <div className="text-2xl font-bold font-display text-[#003769] leading-none mb-1">
-                    {activeApps.length}
-                  </div>
-                  {activeStatusBreakdown.length > 0 ? (
-                    <div className="space-y-0.5">
-                      {activeStatusBreakdown.map((s) => (
-                        <div key={s.label} className="flex items-center gap-1">
-                          <span className={`w-1.5 h-1.5 rounded-full ${s.color} flex-shrink-0`} />
-                          <span className="text-[10px] text-muted-foreground font-semibold">
-                            {s.label}: {s.count}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-[10px] text-muted-foreground font-semibold">
-                      {myApps.length} total submitted
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* YTD Reimbursed */}
-              <Card className="border-2 border-[#003769] shadow-sm hover:shadow-md transition-all rounded-none bg-white">
-                <CardContent className="p-3 flex flex-col justify-between h-full min-h-[80px]">
-                  <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">
-                    Total Reimbursed
-                  </div>
-                  <div className="text-2xl font-bold font-display text-[#003769] leading-none mb-1">
-                    {formatCurrency(ytdReimbursed)}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground font-semibold">
-                    Year-to-date: {approvedApps.length} Approved
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Recent Applications + Application Updates Cards Row */}
+            {/* Recent Applications Card */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* Recent Applications Card */}

@@ -309,22 +309,7 @@ export function Layout({
         </div>
       </header>
 
-      {/* Welcome Banner (All pages) */}
-      <div 
-        className="w-full bg-gradient-to-r from-[#008573] to-[#94c5e3] flex items-center justify-between px-8 sm:px-12 py-8 flex-shrink-0 border-b border-border"
-        data-ocid="layout.welcome_banner"
-      >
-        <h1 className="text-white font-display font-medium text-2xl sm:text-3xl tracking-wide text-left">
-          Welcome to the HealthyME Tuition Portal
-        </h1>
-        <Button
-          onClick={() => router.push("/apply")}
-          className="rounded-full bg-white text-[#008573] hover:bg-white/95 font-bold px-6 py-4 shadow-sm shrink-0"
-          data-ocid="layout.quick_apply_button"
-        >
-          Apply Now
-        </Button>
-      </div>
+
 
       {/* Main Body below Header */}
       <div className={cn(

@@ -61,10 +61,10 @@ const STEPS = [
 ];
 
 const PROGRAMS = [
-  { id: "regular", name: "Regular Tuition", cap: "$3,000 / 18 credits", eligible: "All Employees & NYSNA" },
-  { id: "cme", name: "CME Reimbursement", cap: "Dept Budget", eligible: "PAs & Non-Union PTs" },
-  { id: "mmc", name: "MMC Scholarship", cap: "$500 (Need-based)", eligible: "Children of Employees" },
-  { id: "dependent", name: "Dependent Tuition", cap: "$4,000–$6,000", eligible: "Docs/Scientists/Execs" },
+  { id: "regular", name: "Employee Tuition Reimbursement", cap: "$3,000 / 18 credits", eligible: "All Employees & NYSNA" },
+  { id: "cme", name: "Continuing Medical Education (CME) Reimbursement for Physician Assistants and Weiler Physical Therapists", cap: "Dept Budget", eligible: "PAs & Non-Union PTs" },
+  { id: "mmc", name: "Scholarship Program for Children of MMC Employees", cap: "$500 (Need-based)", eligible: "Children of Employees" },
+  { id: "dependent", name: "Tuition Reimbursement for Children of Physicians, Scientists and Executives", cap: "$4,000–$6,000", eligible: "Docs/Scientists/Execs" },
 ];
 
 const INSTITUTIONS = [
@@ -78,9 +78,9 @@ const INSTITUTIONS = [
 ];
 
 const SUGGESTED_PROMPTS = [
-  { id: "new_claim", label: "Start Reimbursement Application", icon: DollarSign },
+  { id: "new_claim", label: "Start reimbursement application", icon: DollarSign },
   { id: "status", label: "Check application status", icon: Clock },
-  { id: "payroll", label: "Payroll & Paystubs", icon: CreditCard },
+  { id: "payroll", label: "Payroll and pay stubs", icon: CreditCard },
   { id: "leave", label: "Apply for leave", icon: Briefcase },
   { id: "policy", label: "Reimbursement policy", icon: FileText },
 ];
@@ -147,11 +147,20 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
 
   useEffect(() => {
     if (messages.length === 0) {
-      setTimeout(() => {
-        addAssistantMessage(
-          "Welcome to your **Montefiore Employee HR Hub**! I'm here to help you manage your **Reimbursements**, view **Payroll & Paystubs**, or apply for **Leave**. How can I assist you today?"
-        );
-      }, 1000);
+      setIsTyping(true);
+      const timer = setTimeout(() => {
+        setMessages([
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            role: "assistant",
+            content: "Welcome to your **Montefiore Employee HR Hub**! I'm here to help you manage your **Reimbursements**, view **Payroll & Paystubs**, or apply for **Leave**. How can I assist you today?",
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            showLabel: true,
+          }
+        ]);
+        setIsTyping(false);
+      }, 600);
+      return () => clearTimeout(timer);
     }
   }, [messages.length]);
 
@@ -198,6 +207,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
   };
 
   const handleNewChat = () => {
+    setInputValue("");
     setMessages([]);
     setCurrentStep(null);
     setSelectedProgram(null);
@@ -219,15 +229,15 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                 <div className="flex gap-2 w-full">
                     <button 
                         onClick={() => triggerUpload()} 
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-white text-slate-600 text-[9px] font-bold border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"
+                        className="flex-1 px-3 py-2.5 rounded-xl bg-white text-slate-600 text-[13px] font-semibold border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"
                     >
-                        Upload Another
+                        Upload another
                     </button>
                     <button 
-                        onClick={() => { addUserMessage("Continue to Review"); handleStepUpdate(6); }} 
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-[#003769] text-[9px] font-bold border border-indigo-100 hover:bg-indigo-100 transition-colors shadow-sm"
+                        onClick={() => { addUserMessage("Continue to review"); handleStepUpdate(6); }} 
+                        className="flex-1 px-3 py-2.5 rounded-xl bg-indigo-50 text-[#003769] text-[13px] font-semibold border border-indigo-100 hover:bg-indigo-100 transition-colors shadow-sm"
                     >
-                        Continue to Review
+                        Continue to review
                     </button>
                 </div>
             </div>
@@ -260,7 +270,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                       handleStepUpdate(nextStep + 1);
                   }
                 }} 
-                className="flex-1 min-w-[120px] px-3 py-1.5 rounded-lg bg-indigo-50 text-[#003769] text-[9px] font-bold hover:bg-indigo-100 transition-colors border border-indigo-100 shadow-sm"
+                className="flex-1 min-w-[120px] px-3 py-2.5 rounded-xl bg-indigo-50 text-[#003769] text-[13px] font-semibold hover:bg-indigo-100 transition-colors border border-indigo-100 shadow-sm active:scale-95 tracking-[0.01em]"
               >
                 {opt.label}
               </button>
@@ -284,7 +294,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                     <ActionButtons options={[
                         { label: "Yes, I meet them" }, 
                         { label: "No, I don't" }, 
-                        { label: "Check Policy", action: () => { addUserMessage("Check Policy"); addAssistantMessage("You can view the full policy [here](https://example.com/policy)."); } }
+                        { label: "Check policy", action: () => { addUserMessage("Check policy"); addAssistantMessage("You can view the full policy [here](https://example.com/policy)."); } }
                     ]} />
                   </div>
                 );
@@ -300,7 +310,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                         <p className="text-xs font-semibold">Dept: Engineering (IT)</p>
                         <p className="text-xs font-semibold">ID: EMP-99281</p>
                     </div>
-                    <ActionButtons options={[{ label: "Confirm & Continue" }, { label: "Update Info" }]} />
+                    <ActionButtons options={[{ label: "Confirm and continue" }, { label: "Update info" }]} />
                   </div>
                 );
                 break;
@@ -311,8 +321,8 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                       Step 4: **Course Details**. What is the name of the course/program and the accredited institution?
                     </MarkdownContent>
                     <ActionButtons options={[
-                        { label: "Search Institution", action: () => {
-                            addUserMessage("Search Institution");
+                        { label: "Search institution", action: () => {
+                            addUserMessage("Search institution");
                             addAssistantMessage(
                                 <div className="space-y-3 w-full">
                                     <p className="text-[12px] font-semibold text-slate-600">Please select your institution from the list below:</p>
@@ -339,7 +349,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                     <MarkdownContent>
                       {`Step 5: **Tuition & Credits**. Please enter the total amount. Note: **IRS §127** allows up to **$5,250** tax-free per year. ${program?.id === 'regular' ? 'Your cap is **$3,000 / 18 credits**.' : ''}`}
                     </MarkdownContent>
-                    <ActionButtons options={[{ label: "Enter Amount" }, { label: "Calculate Tax Impact" }]} />
+                    <ActionButtons options={[{ label: "Enter amount" }, { label: "Calculate tax impact" }]} />
                   </div>
                 );
                 break;
@@ -352,14 +362,14 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                     <div className="grid grid-cols-2 gap-2 mt-2 w-full">
                         <button onClick={triggerUpload} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group active:scale-95 w-full">
                             <Upload className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600" />
-                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Receipt</span>
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Receipt</span>
                         </button>
                         <button onClick={triggerUpload} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all group active:scale-95 w-full">
                             <Upload className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600" />
-                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Syllabus</span>
+                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Syllabus</span>
                         </button>
                     </div>
-                    <ActionButtons options={[{ label: "Continue to Review" }, { label: "I'll do it later" }]} />
+                    <ActionButtons options={[{ label: "Continue to review" }, { label: "I'll do it later" }]} />
                   </div>
                 );
                 break;
@@ -385,7 +395,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                             </div>
                         </div>
                     </div>
-                    <ActionButtons options={[{ label: "Proceed to Final Step" }]} />
+                    <ActionButtons options={[{ label: "Proceed to final step" }]} />
                   </div>
                 );
                 break;
@@ -396,11 +406,11 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                       Step 8: **Review & Submit**. Please review your summary. A service agreement will be sent for e-signature via DocuSign.
                     </MarkdownContent>
                     <div className="mt-3 space-y-2 p-3 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 shadow-inner w-full text-[12px]">
-                        <div className="flex justify-between"><span className="text-slate-500 font-bold uppercase tracking-tighter">Program</span><span className="font-bold">{program?.name || 'Regular Tuition'}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-500 font-bold uppercase tracking-tighter">Program</span><span className="font-bold">{program?.name || 'Employee Tuition Reimbursement'}</span></div>
                         <div className="flex justify-between"><span className="text-slate-500 font-bold uppercase tracking-tighter">Amount</span><span className="font-bold">$2,450.00</span></div>
                         <div className="flex justify-between"><span className="text-slate-500 font-bold uppercase tracking-tighter">Tax Status</span><span className="font-bold text-green-600 text-[9px] bg-green-100 px-1.5 py-0.5 rounded-full">EXEMPT</span></div>
                     </div>
-                    <ActionButtons options={[{ label: "Submit Application" }, { label: "Edit Details" }]} />
+                    <ActionButtons options={[{ label: "Submit application" }, { label: "Edit details" }]} />
                   </div>
                 );
                 break;
@@ -420,12 +430,12 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                         </div>
                     </div>
                     <ActionButtons options={[
-                        { label: "View My Claims", action: () => {
-                            addUserMessage("View My Claims");
+                        { label: "View my claims", action: () => {
+                            addUserMessage("View my claims");
                             setCurrentStep(null);
                             handleSend("Check status");
                         }}, 
-                        { label: "New Application", action: () => { addUserMessage("Start New Application"); setCurrentStep(0); handleStartApplication(); } }
+                        { label: "New application", action: () => { addUserMessage("Start new application"); setCurrentStep(0); handleStartApplication(); } }
                     ]} />
                   </div>
                 );
@@ -656,14 +666,14 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
-                        <button onClick={() => handleSend("Check status")} className="w-full py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all">Track Status</button>
-                        <button onClick={() => setIsOpen(false)} className="w-full py-3 bg-[#003769] text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-100 hover:bg-blue-800 transition-all">Done</button>
+                        <button onClick={() => handleSend("Check status")} className="w-full py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-[13px] font-semibold tracking-[0.01em] hover:bg-slate-50 transition-all">Track status</button>
+                        <button onClick={() => setIsOpen(false)} className="w-full py-3 bg-[#003769] text-white rounded-xl text-[13px] font-semibold tracking-[0.01em] shadow-lg shadow-blue-100 hover:bg-blue-800 transition-all">Done</button>
                     </div>
                 </div>,
                 500,
                 [
-                    { label: "Reimbursement", icon: DollarSign, action: () => { addUserMessage("Start Reimbursement Application"); handleStartApplication(); } },
-                    { label: "Payroll", icon: CreditCard, action: () => handleSend("Payroll & Paystubs") }
+                    { label: "Reimbursement", icon: DollarSign, action: () => { addUserMessage("Start reimbursement application"); handleStartApplication(); } },
+                    { label: "Payroll", icon: CreditCard, action: () => handleSend("Payroll and pay stubs") }
                 ]
             );
         }, 500);
@@ -724,23 +734,14 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.8, opacity: 0, y: 20 }}
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-auto h-12 px-6 bg-[#1e293b] rounded-full shadow-2xl flex items-center gap-3 text-white hover:scale-105 transition-all z-[100] border border-white/10 group active:scale-95"
+          className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-24 h-24 sm:w-28 sm:h-28 bg-[#003769] rounded-full shadow-2xl hover:shadow-[0_8px_30px_rgba(0,55,105,0.25)] flex flex-col items-center justify-center text-white hover:scale-105 active:scale-95 transition-all z-[100] border-2 border-white/20 group"
         >
-          <div className="relative w-5 h-5 flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="url(#gemini-gradient)" />
-              <defs>
-                <linearGradient id="gemini-gradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#4285F4" />
-                  <stop offset="0.33" stopColor="#EA4335" />
-                  <stop offset="0.66" stopColor="#FBBC05" />
-                  <stop offset="1" stopColor="#34A853" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute inset-0 bg-white/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity rounded-full"></div>
+          <div className="flex flex-col items-center justify-center text-center font-bold leading-[1.2] text-[8.5px] sm:text-[10px] tracking-wider select-none px-2 uppercase">
+            <span>Ask Your</span>
+            <span>Tuition</span>
+            <span>Navigation</span>
+            <span>Agent</span>
           </div>
-          <span className="text-[13px] sm:text-[14px] font-semibold tracking-tight uppercase">Ask Agent</span>
         </motion.button>
       ) : (
         <motion.div
@@ -752,7 +753,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
           className="fixed inset-0 sm:left-auto sm:right-0 w-full sm:w-[85vw] md:w-[450px] lg:w-[480px] bg-white shadow-2xl flex flex-col z-[100] overflow-hidden"
         >
           {/* Header */}
-          <header className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+          <header className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-20">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0">
                 <Sparkles className="w-6 h-6 text-indigo-600" />
@@ -788,17 +789,17 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                     >
                         <button 
                             onClick={handleNewChat}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all text-left uppercase tracking-tight"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all text-left tracking-[0.01em]"
                         >
                             <MessageSquarePlus className="w-3.5 h-3.5 shrink-0" />
-                            New Chat
+                            New chat
                         </button>
                         <button 
                             onClick={() => setShowMenu(false)}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-red-500 hover:bg-red-50 transition-all text-left uppercase tracking-tight"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-red-500 hover:bg-red-50 transition-all text-left tracking-[0.01em]"
                         >
                             <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                            Clear History
+                            Clear history
                         </button>
                     </motion.div>
                 )}
@@ -871,7 +872,10 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                       : "bg-[#f8f9fa] text-slate-700 rounded-[1.2rem] rounded-tl-none border border-slate-100 max-w-[92%] w-full"
                   )}>
                     {typeof msg.content === "string" ? (
-                      <div className="prose prose-sm max-w-none prose-p:leading-relaxed prose-p:my-0 prose-strong:text-inherit prose-strong:font-bold w-full">
+                      <div className={cn(
+                        "prose prose-sm max-w-none prose-p:leading-relaxed prose-p:my-0 prose-strong:text-inherit prose-strong:font-bold w-full",
+                        msg.role === "user" ? "prose-invert text-white" : "text-slate-700"
+                      )}>
                         <ReactMarkdown>
                           {msg.content}
                         </ReactMarkdown>
@@ -914,7 +918,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
 
             {messages.length === 1 && !isTyping && currentStep === null && (
               <div className="space-y-3 pt-4 w-full text-left">
-                <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Quick Actions</p>
+                <p className="text-[10px] font-bold text-[#003769] uppercase tracking-[0.08em] mb-2 px-1">Quick Actions</p>
                 <div className="grid grid-cols-1 gap-2 w-full">
                   {SUGGESTED_PROMPTS.map((prompt) => (
                     <button
@@ -923,7 +927,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                       className="w-full flex items-center gap-3 p-3.5 sm:p-4 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all text-left shadow-sm group active:scale-[0.98]"
                     >
                       <prompt.icon className="w-4 h-4 text-[#003769] group-hover:scale-110 transition-transform shrink-0" />
-                      <span className="text-[10px] sm:text-[11px] font-bold text-[#003769] uppercase tracking-wide truncate">{prompt.label}</span>
+                      <span className="text-[13px] font-semibold text-[#003769] tracking-[0.01em] truncate">{prompt.label}</span>
                     </button>
                   ))}
                 </div>
@@ -941,7 +945,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend(inputValue)}
                   placeholder={currentStep !== null && STEPS[currentStep] ? `Step ${currentStep + 1}: ${STEPS[currentStep]}...` : "Ask a question..."}
-                  className="w-full bg-white border-2 border-indigo-50 rounded-[1rem] sm:rounded-[1.2rem] px-4 sm:px-5 py-3 sm:py-3.5 text-[12.5px] sm:text-[13px] focus:outline-none focus:border-indigo-200 transition-all pr-10 sm:pr-12 placeholder:text-slate-400 shadow-sm group-hover:border-indigo-100"
+                  className="w-full bg-slate-50 border-2 border-slate-100 text-slate-800 focus:bg-white rounded-[1rem] sm:rounded-[1.2rem] px-4 sm:px-5 py-3 sm:py-3.5 text-[12.5px] sm:text-[13px] font-bold focus:outline-none focus:border-indigo-200 transition-all pr-10 sm:pr-12 placeholder:text-slate-400 shadow-sm group-hover:border-indigo-100"
                 />
                 <button onClick={() => handleSend(inputValue)} className="absolute right-3 p-1.5 text-indigo-500 hover:text-indigo-700 transition-colors shrink-0">
                   <Send className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
@@ -951,8 +955,8 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                 <Mic className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               </button>
             </div>
-            <p className="text-[9px] sm:text-[10px] text-center text-slate-400 mt-3 sm:mt-4 font-bold tracking-tight opacity-70">
-              This is a AI Generated Response
+            <p className="text-[9px] text-center text-[#888888] font-normal leading-[1.3] py-[6px] px-[12px] pb-[10px] select-none">
+              This is an AI generated response
             </p>
           </div>
         </motion.div>
