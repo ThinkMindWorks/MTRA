@@ -20,13 +20,13 @@ const STROKE_COLORS = {
     darkTrack: "rgba(255, 255, 255, 0.1)",
   },
   accent: {
-    light: "var(--brand-teal, #009480)",
+    light: "var(--brand-teal, #008573)",
     dark: "var(--brand-mint, #acd3c0)",
     track: "var(--brand-lightblue, #e6f0f5)",
     darkTrack: "rgba(255, 255, 255, 0.1)",
   },
   success: {
-    light: "var(--brand-teal, #009480)",
+    light: "var(--brand-teal, #008573)",
     dark: "var(--brand-mint, #acd3c0)",
     track: "var(--brand-lightblue, #e6f0f5)",
     darkTrack: "rgba(255, 255, 255, 0.1)",
@@ -122,7 +122,12 @@ export function ProgressRing({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-sm font-bold font-display text-foreground leading-none">
+          <span
+            className={cn(
+              "font-bold font-body text-foreground leading-none",
+              size < 60 ? "text-[10px]" : "text-sm"
+            )}
+          >
             {displayValue}
           </span>
           {sublabel && (

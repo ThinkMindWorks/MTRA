@@ -508,8 +508,8 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                             </div>
                         ))}
                     </div>
-                    <button className="w-full py-2 bg-slate-50 rounded-lg text-[9px] font-bold text-slate-500 hover:bg-slate-100 transition-colors uppercase tracking-widest border border-slate-200">
-                        View All Claims
+                    <button className="w-full py-2 bg-slate-50 rounded-lg text-[9px] font-bold text-slate-500 hover:bg-slate-100 transition-colors tracking-wide border border-slate-200">
+                        View all claims
                     </button>
                 </div>,
                 500,
@@ -604,15 +604,15 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                                                                                         </div>
                                                                                         <p className="text-[12px] text-slate-600 leading-relaxed">Your request for **{type}** has been successfully drafted and saved to your profile. Would you like to submit it for approval now?</p>
                                                                                         <div className="flex flex-col sm:flex-row gap-2 w-full">
-                                                                                            <button onClick={() => handleSend("Submit for Approval")} className="flex-1 py-3 bg-[#003769] text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all">Submit Now</button>
-                                                                                            <button onClick={() => addUserMessage("Save for later")} className="flex-1 py-3 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-widest active:scale-95 transition-all">Save for later</button>
+                                                                                            <button onClick={() => handleSend("Submit for Approval")} className="flex-1 py-3 bg-[#003769] text-white rounded-xl text-[10px] font-bold tracking-wide shadow-lg active:scale-95 transition-all">Submit now</button>
+                                                                                            <button onClick={() => addUserMessage("Save for later")} className="flex-1 py-3 bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-bold tracking-wide active:scale-95 transition-all">Save for later</button>
                                                                                         </div>
                                                                                     </div>
                                                                                 ); 
                                                                             }}
-                                                                            className="w-full py-3 bg-[#003769] text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-blue-900/10 hover:scale-[1.01] active:scale-[0.98] transition-all"
+                                                                            className="w-full py-3 bg-[#003769] text-white rounded-xl text-[10px] font-bold tracking-wide shadow-xl shadow-blue-900/10 hover:scale-[1.01] active:scale-[0.98] transition-all"
                                                                         >
-                                                                            Proceed to Confirmation
+                                                                            Proceed to confirmation
                                                                         </button>
                                                                     </div>
                                                                 );
@@ -634,9 +634,9 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                                                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0" />
                                             </div>
                                             <button 
-                                                className="w-full py-3 bg-[#003769] text-white rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-blue-900/10 opacity-50 cursor-not-allowed"
+                                                className="w-full py-3 bg-[#003769] text-white rounded-xl text-[10px] font-bold tracking-wide shadow-xl shadow-blue-900/10 opacity-50 cursor-not-allowed"
                                             >
-                                                Proceed to Confirmation
+                                                Proceed to confirmation
                                             </button>
                                         </div>
                                     );
@@ -892,7 +892,7 @@ export default function AIAssistant({ isOpen, setIsOpen }: { isOpen: boolean, se
                             <button 
                                 key={i}
                                 onClick={act.action}
-                                className="flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-50 text-[#003769] text-[10px] font-bold hover:bg-indigo-100 transition-all border border-indigo-100 shadow-sm active:scale-95 uppercase tracking-wide"
+                                className="flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-50 text-[#003769] text-[10px] font-bold hover:bg-indigo-100 transition-all border border-indigo-100 shadow-sm active:scale-95 tracking-wide"
                             >
                                 <act.icon className="w-3.5 h-3.5 shrink-0" /> {act.label}
                             </button>

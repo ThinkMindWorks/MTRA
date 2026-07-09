@@ -1,5 +1,7 @@
 
 
+import { LogoLockup } from "@/components/ui/LogoLockup";
+
 interface AuthLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -47,11 +49,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         {/* Logo */}
         <div className="relative z-10 space-y-8 flex flex-col items-start">
           <div>
-            <img 
-              src="/assets/images/logo_lockup_blue.png" 
-              alt="HealthyME | Life@ Montefiore" 
-              className="h-12 w-auto object-contain -ml-4 -mt-3" 
-            />
+            <LogoLockup variant="blue" size="lg" />
           </div>
 
           <h2 
@@ -86,11 +84,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         <div className="w-full max-w-sm">
           {/* Brand Logo */}
           <div className="mb-8">
-            <img 
-              src="/assets/images/logo_lockup.jpg" 
-              alt="HealthyME" 
-              className="h-12 w-auto object-contain -ml-4" 
-            />
+            <LogoLockup size="lg" />
           </div>
 
           {(title || subtitle) && (

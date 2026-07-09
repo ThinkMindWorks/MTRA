@@ -13,6 +13,7 @@ import type { ChatMessage } from "@/types";
 export function ChatPanel() {
   const { 
     currentUser, 
+    isAuthenticated,
     isChatOpen, 
     setIsChatOpen, 
     chatMessages, 
@@ -41,6 +42,10 @@ export function ChatPanel() {
 
   const handleSend = (text: string) => {
     if (!text.trim()) return;
+    if (!isAuthenticated || !currentUser) {
+      console.error("System error: Unauthenticated chat message attempted.");
+      return;
+    }
     
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`,
@@ -66,6 +71,7 @@ export function ChatPanel() {
     }, 1500);
   };
 
+  if (!isAuthenticated || !currentUser) return null;
   if (!isChatOpen) return null;
 
   return (
@@ -80,7 +86,7 @@ export function ChatPanel() {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-foreground">{persona.name}</span>
+              <span className="font-display text-[13px] font-semibold text-foreground">{persona.name}</span>
               <Badge variant="outline" className="text-[8px] h-3.5 px-1 border-primary/30 text-primary uppercase font-bold tracking-wider">
                 {persona.role}
               </Badge>
@@ -121,9 +127,9 @@ export function ChatPanel() {
                 <Sparkles className="w-7 h-7 text-brand-teal animate-pulse" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-bold text-foreground">Welcome to HealthyME Chat</p>
-                <p className="text-xs text-muted-foreground px-10">
-                  {persona.systemPrompt}
+                <p className="text-sm font-bold text-foreground font-display text-[13px]">HealthyME Navigator</p>
+                <p className="text-xs text-muted-foreground px-10 font-body">
+                  Hi, I am your HealthyME Navigator. How can I help you today?
                 </p>
               </div>
             </div>

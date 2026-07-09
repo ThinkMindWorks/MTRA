@@ -4,6 +4,16 @@ import { Layout } from "@/components/layout/Layout";
 // HealthyME — 9-Step Tuition Reimbursement Application Wizard
 import { AIConfidenceBadge } from "@/components/ui/AIConfidenceBadge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +32,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { mockEmployees, mockPrograms } from "@/data/mockData";
 import { useAppStore } from "@/store/appStore";
-import type { Document, ProgramType, WizardData } from "@/types";
+import type { Document, ProgramType, WizardData, CourseEntry } from "@/types";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -235,53 +245,42 @@ function Step1Program({
               }
               data-ocid={`apply.program_card.${prog.id}`}
               className={[
-                "text-left rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md",
+                "text-left rounded-lg border-2 p-3 transition-all duration-200 hover:shadow-md h-[120px] flex flex-col justify-between",
                 selected
-                  ? "border-primary bg-primary/5 shadow-md"
+                  ? "border-primary bg-primary/5 shadow-sm"
                   : "border-border bg-card hover:border-primary/40",
               ].join(" ")}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="text-2xl">{prog.icon}</div>
-                <div className="flex flex-col items-end gap-0.5">
-                  {selected && (
-                    <Badge className="bg-primary text-primary-foreground text-[9px] px-1.5 py-0.5">
-                      Selected
-                    </Badge>
-                  )}
-                  <span className="text-[10px] text-muted-foreground">Up to</span>
-                  <span className="text-base font-bold text-foreground">
-                    ${prog.maxAmount.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-              <h3 className="text-sm font-bold text-foreground mt-1.5">
-                {prog.name}
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-0.5 leading-normal">
-                {prog.description}
-              </p>
-              <div className="mt-2 space-y-0.5">
-                {prog.eligibilityRules.slice(0, 3).map((rule) => (
-                  <div key={rule} className="flex items-start gap-1.5">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-primary mt-0.5 flex-shrink-0" />
-                    <span className="text-[10px] text-muted-foreground leading-tight">
-                      {rule}
-                    </span>
+              <div className="w-full">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="text-xl">{prog.icon}</div>
+                  <div className="flex flex-col items-end gap-0">
+                    {selected && (
+                      <Badge className="bg-primary text-primary-foreground text-[8px] h-3.5 px-1 py-0 justify-center">
+                        Selected
+                      </Badge>
+                    )}
+                    <div className="flex items-baseline gap-1 mt-0.5">
+                      <span className="text-[9px] text-muted-foreground">Up to</span>
+                      <span className="text-sm font-bold text-foreground">
+                        ${prog.maxAmount.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                ))}
-                {prog.eligibilityRules.length > 3 && (
-                  <span className="text-[10px] text-muted-foreground">
-                    +{prog.eligibilityRules.length - 3} more requirements
-                  </span>
-                )}
+                </div>
+                <h3 className="text-xs font-bold text-foreground mt-1 leading-tight">
+                  {prog.name}
+                </h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5 leading-normal line-clamp-2">
+                  {prog.description}
+                </p>
               </div>
               {prog.maxCredits > 0 && (
-                <div className="mt-2 pt-2 border-t border-border flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">
+                <div className="mt-1.5 pt-1 border-t border-border flex items-center justify-between w-full">
+                  <span className="text-[9px] text-muted-foreground">
                     Max Credits
                   </span>
-                  <span className="text-[11px] font-semibold text-foreground">
+                  <span className="text-[10px] font-semibold text-foreground">
                     {prog.maxCredits} credits/year
                   </span>
                 </div>
@@ -410,6 +409,7 @@ function Step3EmployeeInfo({
 }
 
 // ─── Step 4: Course Details ────────────────────────────────────
+// ─── Step 4: Course Details ────────────────────────────────────
 function Step4CourseDetails({
   data,
   onUpdate,
@@ -418,20 +418,90 @@ function Step4CourseDetails({
   onUpdate: (d: Partial<WizardData>) => void;
 }) {
   const emp = mockEmployees[0];
-  const [instQuery, setInstQuery] = useState(data.institution ?? "");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const filteredInst = NY_UNIVERSITIES.filter((u) =>
-    u.toLowerCase().includes(instQuery.toLowerCase()),
+  const courses = data.courses && data.courses.length > 0 ? data.courses : [];
+  const [courseToRemove, setCourseToRemove] = useState<{ id: string; index: number } | null>(null);
+
+  // Initialize course if list is empty
+  useEffect(() => {
+    if (!data.courses || data.courses.length === 0) {
+      onUpdate({
+        courses: [
+          {
+            id: `course-${Date.now()}`,
+            courseTitle: data.courseTitle ?? "",
+            courseCode: "",
+            institution: data.institution ?? "CUNY Lehman College",
+            credits: data.credits ?? 6,
+            amount: data.amount ?? 320,
+            startDate: "2026-01-13",
+            endDate: "2026-05-15",
+            term: "spring2026",
+            level: "graduate",
+            creditType: "academic",
+            gradeReceived: "In Progress",
+          },
+        ],
+      });
+    }
+  }, []);
+
+  const addCourse = () => {
+    if (courses.length >= 6) return;
+    const newCourse = {
+      id: `course-${Date.now()}-${Math.random()}`,
+      courseTitle: "",
+      courseCode: "",
+      institution: "CUNY Lehman College",
+      credits: 3,
+      amount: 320,
+      startDate: "2026-01-13",
+      endDate: "2026-05-15",
+      term: "spring2026",
+      level: "graduate",
+      creditType: "academic",
+      gradeReceived: "In Progress",
+    };
+    const updated = [...courses, newCourse];
+    onUpdate({
+      courses: updated,
+      institution: updated[0].institution,
+      courseTitle: updated[0].courseTitle,
+      credits: updated.reduce((sum, c) => sum + c.credits, 0),
+      amount: updated.reduce((sum, c) => sum + c.amount, 0),
+    });
+  };
+
+  const updateCourseField = (id: string, field: keyof CourseEntry, value: any) => {
+    const updated = courses.map((c) => {
+      if (c.id === id) {
+        return { ...c, [field]: value };
+      }
+      return c;
+    });
+    onUpdate({
+      courses: updated,
+      institution: updated[0]?.institution ?? "",
+      courseTitle: updated[0]?.courseTitle ?? "",
+      credits: updated.reduce((sum, c) => sum + c.credits, 0),
+      amount: updated.reduce((sum, c) => sum + c.amount, 0),
+    });
+  };
+
+  const removeCourse = (id: string, index: number) => {
+    setCourseToRemove({ id, index });
+  };
+
+  // Running totals
+  const totalCredits = courses.reduce((sum, c) => sum + c.credits, 0);
+  const totalTuition = courses.reduce((sum, c) => sum + c.amount, 0);
+
+  // Validations
+  const totalWithYtdCredits = totalCredits + emp.creditUsed;
+  const showCreditCapWarning = totalWithYtdCredits > 18;
+
+  const showInProgressWarning = courses.some(
+    (c) => c.gradeReceived === "In Progress" || c.gradeReceived === "Enrolled"
   );
-
-  const tuition = data.amount ?? 320;
-  const fees = 248;
-  const textbooks = 185;
-  const totalCost = tuition + fees + textbooks;
-  const credits = data.credits ?? 6;
-
-  const selectedProg = mockPrograms.find((p) => p.programType === data.programType);
-  const showCreditsSlider = selectedProg ? selectedProg.maxCredits > 0 : true;
 
   return (
     <div className="space-y-6">
@@ -439,14 +509,15 @@ function Step4CourseDetails({
         <h2 className="text-xl font-bold font-display text-foreground">
           Course, Institution & Cost Details
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Complete the details below to submit your reimbursement request.
+        <p className="text-sm text-muted-foreground mt-1 font-body">
+          Complete the details below to submit your reimbursement request. You can add up to 6 courses per application.
         </p>
       </div>
 
+      {/* Applicant Card */}
       <Card className="bg-muted/40 border-border">
         <CardContent className="p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-body">
             <div>
               <span className="text-muted-foreground block">Applicant Name</span>
               <span className="font-semibold text-foreground">{emp.name}</span>
@@ -467,278 +538,218 @@ function Step4CourseDetails({
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold">Course & Institution Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1 relative">
-              <Label htmlFor="institution" className="text-sm font-medium">
-                Institution Name <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="institution"
-                value={instQuery}
-                onChange={(e) => {
-                  setInstQuery(e.target.value);
-                  setShowSuggestions(true);
-                  onUpdate({ institution: e.target.value });
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="Search institution..."
-                autoComplete="off"
-                data-ocid="apply.course.institution"
-              />
-              {showSuggestions &&
-                instQuery.length > 0 &&
-                filteredInst.length > 0 && (
-                  <div className="absolute z-20 top-full mt-1 w-full rounded-lg border border-border bg-popover shadow-lg overflow-hidden">
-                    {filteredInst.map((u) => (
-                      <button
-                        key={u}
-                        type="button"
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
-                        onMouseDown={() => {
-                          setInstQuery(u);
-                          onUpdate({ institution: u });
-                          setShowSuggestions(false);
-                        }}
-                      >
-                        {u}
-                      </button>
-                    ))}
-                  </div>
-                )}
-            </div>
+      {/* Warning Banners */}
+      {showCreditCapWarning && (
+        <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-lg text-xs space-y-1 font-body">
+          <span className="font-bold block">Credit Cap Warning</span>
+          Warning: Total credit hours across all courses in this application + YTD used credits ({totalWithYtdCredits} credits) exceeds 18-credit cap.
+        </div>
+      )}
 
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <Label htmlFor="course-name" className="text-sm font-medium">
-                  Course Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="course-name"
-                  defaultValue={data.courseTitle ?? ""}
-                  placeholder="e.g. Advanced Clinical Nursing Leadership"
-                  onChange={(e) => onUpdate({ courseTitle: e.target.value })}
-                  data-ocid="apply.course.name"
-                />
+      {showInProgressWarning && (
+        <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-lg text-xs space-y-1 font-body">
+          <span className="font-bold block">Tier 1 SOP Checklist Warning</span>
+          Warning: Application contains in-progress or enrolled courses. Final reimbursement depends on grade verification.
+        </div>
+      )}
+
+      {/* Course List */}
+      <div className="space-y-4">
+        {courses.map((course, index) => (
+          <Card key={course.id} className="border-border relative">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="text-sm font-semibold">Course {index + 1}</CardTitle>
+              {index > 0 && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => removeCourse(course.id, index)}
+                  className="h-7 px-2.5 text-xs font-semibold rounded-md font-body"
+                >
+                  Remove
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Course Name */}
+                <div className="space-y-1">
+                  <Label htmlFor={`course-name-${course.id}`} className="text-xs font-semibold font-body">
+                    Course Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id={`course-name-${course.id}`}
+                    value={course.courseTitle}
+                    placeholder="e.g. Advanced Clinical Nursing Leadership"
+                    onChange={(e) => updateCourseField(course.id, "courseTitle", e.target.value)}
+                    data-ocid={`apply.course.name-${index}`}
+                  />
+                </div>
+
+                {/* Institution Name Select */}
+                <div className="space-y-1">
+                  <Label htmlFor={`institution-${course.id}`} className="text-xs font-semibold font-body">
+                    Institution Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={course.institution}
+                    onValueChange={(val) => updateCourseField(course.id, "institution", val)}
+                  >
+                    <SelectTrigger id={`institution-${course.id}`} data-ocid={`apply.course.institution-${index}`}>
+                      <SelectValue placeholder="Select institution..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {NY_UNIVERSITIES.map((uni) => (
+                        <SelectItem key={uni} value={uni}>
+                          {uni}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {/* Course Code */}
                 <div className="space-y-1">
-                  <Label htmlFor="course-code" className="text-sm font-medium">
+                  <Label htmlFor={`course-code-${course.id}`} className="text-xs font-semibold font-body">
                     Course Code
                   </Label>
                   <Input
-                    id="course-code"
+                    id={`course-code-${course.id}`}
+                    value={course.courseCode ?? ""}
                     placeholder="e.g. NUR 604"
-                    data-ocid="apply.course.code"
+                    onChange={(e) => updateCourseField(course.id, "courseCode", e.target.value)}
+                    data-ocid={`apply.course.code-${index}`}
                   />
                 </div>
+
+                {/* Credit Hours */}
                 <div className="space-y-1">
-                  <Label htmlFor="credits" className="text-sm font-medium">
+                  <Label htmlFor={`credits-${course.id}`} className="text-xs font-semibold font-body">
                     Credit Hours <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    id="credits"
+                    id={`credits-${course.id}`}
                     type="number"
                     min={1}
                     max={18}
-                    defaultValue={6}
-                    data-ocid="apply.course.credit_hours"
+                    value={course.credits}
+                    onChange={(e) => updateCourseField(course.id, "credits", Math.max(1, Number(e.target.value)))}
+                    data-ocid={`apply.course.credit_hours-${index}`}
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
+                {/* Tuition Amount */}
                 <div className="space-y-1">
-                  <Label htmlFor="start-date" className="text-sm font-medium">
-                    Start Date <span className="text-destructive">*</span>
+                  <Label htmlFor={`amount-${course.id}`} className="text-xs font-semibold font-body">
+                    Tuition Amount <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="start-date"
-                    type="date"
-                    defaultValue="2026-01-13"
-                    data-ocid="apply.course.start_date"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="end-date" className="text-sm font-medium">
-                    End Date <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="end-date"
-                    type="date"
-                    defaultValue="2026-05-15"
-                    data-ocid="apply.course.end_date"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label htmlFor="term" className="text-sm font-medium">
-                    Academic Term
-                  </Label>
-                  <Select defaultValue="spring2026">
-                    <SelectTrigger id="term" data-ocid="apply.course.term">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="spring2026">Spring 2026</SelectItem>
-                      <SelectItem value="summer2026">Summer 2026</SelectItem>
-                      <SelectItem value="fall2026">Fall 2026</SelectItem>
-                      <SelectItem value="spring2027">Spring 2027</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="course-level" className="text-sm font-medium">
-                    Course Level <span className="text-destructive">*</span>
-                  </Label>
-                  <Select defaultValue="graduate">
-                    <SelectTrigger id="course-level" data-ocid="apply.course.level">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="undergraduate">Undergraduate</SelectItem>
-                      <SelectItem value="graduate">Graduate</SelectItem>
-                      <SelectItem value="professional">Professional / Doctoral</SelectItem>
-                      <SelectItem value="certificate">Certificate Program</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="credit-type" className="text-sm font-medium">
-                  Credit Type
-                </Label>
-                <Select defaultValue="academic">
-                  <SelectTrigger id="credit-type" data-ocid="apply.course.credit_type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="academic">Academic Credit</SelectItem>
-                    <SelectItem value="cme">CME Credit</SelectItem>
-                    <SelectItem value="ceu">CEU Credit</SelectItem>
-                    <SelectItem value="audit">Audit (No Credit)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-4">
-          <Card className="border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Cost Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="tuition-amount" className="text-sm font-medium">
-                  Tuition Amount <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                    $
-                  </span>
-                  <Input
-                    id="tuition-amount"
-                    type="number"
-                    min={0}
-                    max={emp.tuitionBalance}
-                    value={tuition}
-                    onChange={(e) =>
-                      onUpdate({ amount: Number(e.target.value) })
-                    }
-                    className="pl-7"
-                    data-ocid="apply.tuition.amount_input"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-sm font-medium">Course Fees</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-body">
                       $
                     </span>
                     <Input
-                      defaultValue={fees}
-                      className="pl-7 bg-muted/30"
-                      readOnly
-                      data-ocid="apply.tuition.fees"
+                      id={`amount-${course.id}`}
+                      type="number"
+                      min={0}
+                      value={course.amount}
+                      onChange={(e) => updateCourseField(course.id, "amount", Math.max(0, Number(e.target.value)))}
+                      className="pl-7"
+                      data-ocid={`apply.tuition.amount_input-${index}`}
                     />
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-sm font-medium">Required Textbooks</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                      $
-                    </span>
-                    <Input
-                      defaultValue={textbooks}
-                      className="pl-7 bg-muted/30"
-                      readOnly
-                      data-ocid="apply.tuition.textbooks"
-                    />
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/60 border border-border">
-                <span className="text-sm font-semibold">Total Program Cost</span>
-                <span className="text-lg font-bold text-foreground">
-                  ${totalCost.toLocaleString()}
-                </span>
+                {/* Grade Received */}
+                <div className="space-y-1">
+                  <Label htmlFor={`grade-${course.id}`} className="text-xs font-semibold font-body">
+                    Grade Received <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={course.gradeReceived ?? "In Progress"}
+                    onValueChange={(val) => updateCourseField(course.id, "gradeReceived", val)}
+                  >
+                    <SelectTrigger id={`grade-${course.id}`} data-ocid={`apply.course.grade-${index}`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["A", "A-", "B+", "B", "B-", "C+", "C", "In Progress", "Enrolled"].map((g) => (
+                        <SelectItem key={g} value={g}>
+                          {g}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
-
-          {showCreditsSlider && (
-            <Card className="border-border">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  Credits to Apply
-                  <Badge variant="outline" className="text-xs">
-                    {credits} credits
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">
-                    Credits used: {emp.creditUsed}/{emp.creditMax}
-                  </span>
-                  <span className="font-medium text-foreground">
-                    Remaining: {emp.creditBalance} credits
-                  </span>
-                </div>
-                <Slider
-                  value={[credits]}
-                  onValueChange={([v]) => onUpdate({ credits: v })}
-                  min={0}
-                  max={emp.creditBalance}
-                  step={1}
-                  className="w-full"
-                  data-ocid="apply.tuition.credits_slider"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>0 credits</span>
-                  <span>{emp.creditBalance} max</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        ))}
       </div>
+
+      {/* Add Course button & Message */}
+      <div className="pt-2">
+        {courses.length < 6 ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addCourse}
+            className="border-[#008573] text-[#008573] hover:bg-[#ebf3ef] font-semibold text-xs py-2 px-4 rounded-md font-body"
+            data-ocid="apply.course.add_button"
+          >
+            Add another course
+          </Button>
+        ) : (
+          <p className="text-xs text-destructive font-semibold font-body">
+            Maximum 6 courses per application. Submit a new application for additional courses.
+          </p>
+        )}
+      </div>
+
+      {/* Running Totals Summary Row */}
+      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
+        <span className="text-xs font-bold text-slate-700 font-body">
+          Total Credit Hours: {totalCredits} | Total Tuition Amount: ${totalTuition.toLocaleString()}
+        </span>
+        <span className="text-xs text-muted-foreground font-body">
+          YTD Credits Used: {emp.creditUsed} / {emp.creditMax}
+        </span>
+      </div>
+
+      {/* Inline AlertDialog for removal confirmation */}
+      <AlertDialog open={courseToRemove !== null} onOpenChange={(open) => { if (!open) setCourseToRemove(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Remove Course {courseToRemove ? courseToRemove.index + 1 : ""}</AlertDialogTitle>
+            <AlertDialogDescription className="font-body">
+              Remove Course {courseToRemove ? courseToRemove.index + 1 : ""}? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-body">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-body"
+              onClick={() => {
+                if (courseToRemove) {
+                  const updated = courses.filter((c) => c.id !== courseToRemove.id);
+                  onUpdate({
+                    courses: updated,
+                    institution: updated[0]?.institution ?? "",
+                    courseTitle: updated[0]?.courseTitle ?? "",
+                    credits: updated.reduce((sum, c) => sum + c.credits, 0),
+                    amount: updated.reduce((sum, c) => sum + c.amount, 0),
+                  });
+                  setCourseToRemove(null);
+                }
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -849,13 +860,13 @@ function Step6Documents({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-2.5">
         {docTypes.map((docType) => {
           const upload = uploads.find((u) => u.docTypeId === docType.id);
           const isDraggingThis = dragging === docType.id;
 
           return (
-            <div key={docType.id} className="space-y-3">
+            <div key={docType.id} className="space-y-1.5">
               <div
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -868,7 +879,7 @@ function Step6Documents({
                   handleFileInput(docType.id, e.dataTransfer.files);
                 }}
                 className={[
-                  "relative border-2 border-dashed rounded-xl p-5 text-center transition-all",
+                  "relative border border-dashed rounded-lg p-3 text-left transition-all flex flex-col sm:flex-row items-center justify-between gap-3 bg-card",
                   upload
                     ? "border-primary/40 bg-primary/5"
                     : isDraggingThis
@@ -887,49 +898,48 @@ function Step6Documents({
                   onChange={(e) => handleFileInput(docType.id, e.target.files)}
                   aria-label={`Upload ${docType.label}`}
                 />
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-2xl">{docType.icon}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {docType.label}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {docType.description}
-                    </p>
+                <div className="flex items-center gap-3 w-full justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl shrink-0">{docType.icon}</span>
+                    <div className="text-left">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-foreground">
+                          {docType.label}
+                        </p>
+                        {docType.required && !upload && (
+                          <Badge
+                            variant="outline"
+                            className="text-[8px] h-4 px-1 border-destructive/40 text-destructive bg-destructive/5 font-bold uppercase tracking-wider rounded-none"
+                          >
+                            Required
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {docType.description}
+                      </p>
+                    </div>
                   </div>
                   {!upload && (
-                    <>
-                      <Upload className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">
-                        Drag & drop or
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          fileInputRefs.current[docType.id]?.click()
-                        }
-                        data-ocid={`apply.upload.${docType.id}.upload_button`}
-                      >
-                        Browse Files
-                      </Button>
-                    </>
-                  )}
-                  {docType.required && !upload && (
-                    <Badge
+                    <Button
+                      type="button"
                       variant="outline"
-                      className="text-[10px] border-destructive/40 text-destructive"
+                      size="sm"
+                      className="h-8 text-xs font-bold shrink-0 shadow-sm border-primary/20 text-primary hover:bg-primary/5 px-3 rounded-none"
+                      onClick={() =>
+                        fileInputRefs.current[docType.id]?.click()
+                      }
+                      data-ocid={`apply.upload.${docType.id}.upload_button`}
                     >
-                      Required
-                    </Badge>
+                      Browse Files
+                    </Button>
                   )}
                 </div>
               </div>
 
               {upload && (
-                <Card className="border-border">
-                  <CardContent className="pt-3 pb-3">
+                <Card className="border-border rounded-lg shadow-none">
+                  <CardContent className="py-2 px-3">
                     <div className="flex items-start gap-2">
                       <FileText className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -1030,20 +1040,19 @@ function Step8Review({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h2 className="text-xl font-bold font-display text-foreground">
           Review & Submit
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Review your application before submitting. You cannot edit after
-          submission.
+        <p className="text-xs text-muted-foreground mt-1">
+          Review your application before submitting. You cannot edit after submission.
         </p>
       </div>
 
       {/* Pre-approval/Eligibility Indicator */}
-      <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-        <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+      <div className="flex items-center gap-3 py-2 px-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
         <div className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
           Eligibility Verified: Pre-approved to Proceed based on current HR records.
         </div>
@@ -1051,32 +1060,33 @@ function Step8Review({
 
       {/* AI Review folded issues */}
       {GAP_ISSUES.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-foreground">
+        <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-foreground text-left">
             Issues Requiring Attention
           </h3>
           {GAP_ISSUES.map((issue) => (
             <Alert
               key={issue.id}
               variant={issue.severity === "error" ? "destructive" : "default"}
-              className={
+              className={[
+                "py-2 px-3",
                 issue.severity === "warning"
                   ? "border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800"
                   : ""
-              }
+              ].join(" ")}
               data-ocid={`apply.gap_report.${issue.id}`}
             >
               {issue.severity === "error" ? (
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="h-3.5 w-3.5" />
               ) : (
-                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
               )}
-              <AlertTitle className="text-sm">{issue.title}</AlertTitle>
-              <AlertDescription className="space-y-2">
-                <p className="text-xs">{issue.description}</p>
-                <div className="flex items-start gap-1.5 mt-1">
+              <AlertTitle className="text-xs font-bold leading-tight mt-0.5">{issue.title}</AlertTitle>
+              <AlertDescription className="space-y-1 mt-0.5">
+                <p className="text-[10px] leading-normal">{issue.description}</p>
+                <div className="flex items-start gap-1.5 mt-0.5">
                   <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-blue-500" />
-                  <p className="text-xs text-blue-700 dark:text-blue-400">
+                  <p className="text-[10px] text-blue-700 dark:text-blue-400 leading-normal">
                     {issue.suggestion}
                   </p>
                 </div>
@@ -1086,126 +1096,124 @@ function Step8Review({
         </div>
       )}
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Application Summary</CardTitle>
+      {/* Compact Application Summary Card (3-Column Grid) */}
+      <Card className="border border-border rounded-lg shadow-none">
+        <CardHeader className="py-2 px-4 border-b border-border">
+          <CardTitle className="text-xs font-bold uppercase tracking-wider text-[#003769] text-left">
+            Application Summary
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Employee
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <span className="text-muted-foreground">Name: </span>
-                <span className="font-medium">{emp.name}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">ID: </span>
-                <span className="font-medium">{emp.employeeId}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-muted-foreground">Department: </span>
-                <span className="font-medium">{emp.department}</span>
-              </div>
-            </div>
-          </div>
-          <Separator />
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Program
-            </p>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{selectedProg?.icon}</span>
-              <span className="font-semibold text-foreground">
-                {selectedProg?.name ?? "—"}
-              </span>
-            </div>
-          </div>
-          <Separator />
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Course & Institution
-            </p>
-            <div className="space-y-1 text-sm">
-              <div>
-                <span className="text-muted-foreground">Institution: </span>
-                <span className="font-medium">
-                  {data.institution ?? "Not specified"}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Course: </span>
-                <span className="font-medium">
-                  {data.courseTitle ?? "Not specified"}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Term: </span>
-                <span className="font-medium">Spring 2026</span>
-              </div>
-            </div>
-          </div>
-          <Separator />
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Reimbursement
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <span className="text-muted-foreground">Tuition: </span>
-                <span className="font-medium">
-                  ${(data.amount ?? 320).toLocaleString()}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Credits: </span>
-                <span className="font-medium">{data.credits ?? 6} credits</span>
-              </div>
-            </div>
-          </div>
-          <Separator />
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Documents ({uploads.filter((u) => u.status === "complete").length}{" "}
-              verified)
-            </p>
-            {uploads.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No documents uploaded
+        <CardContent className="py-3 px-4 grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-6 text-left">
+          {/* Column 1: Employee & Program */}
+          <div className="space-y-2.5">
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                Employee
               </p>
-            ) : (
-              <div className="space-y-1">
-                {uploads.map((u) => (
-                  <div key={u.id} className="flex items-center gap-2">
-                    {u.status === "complete" ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                    ) : (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-primary flex-shrink-0" />
-                    )}
-                    <span className="text-xs text-foreground truncate">
-                      {u.fileName}
-                    </span>
-                  </div>
-                ))}
+              <p className="text-xs font-semibold text-foreground">
+                {emp.name} <span className="text-muted-foreground font-normal">({emp.employeeId})</span>
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                {emp.department}
+              </p>
+            </div>
+            <div className="pt-2 border-t border-border/60">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                Program
+              </p>
+              <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <span className="text-lg">{selectedProg?.icon}</span>
+                <span>{selectedProg?.name ?? "—"}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Column 2: Courses & Institutions */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
+              Courses ({data.courses?.length ?? 0})
+            </p>
+            <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+              {(data.courses ?? []).map((course, idx) => (
+                <div key={course.id || idx} className="text-xs border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
+                  <p className="font-semibold text-foreground truncate font-body">
+                    {idx + 1}. {course.courseTitle || "Untitled Course"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate font-body">
+                    {course.institution} ({course.credits} cr)
+                  </p>
+                  <p className="text-[10px] text-muted-foreground font-body">
+                    Grade: <span className="font-medium text-foreground">{course.gradeReceived}</span> | Amount: <span className="font-medium text-foreground">${course.amount}</span>
+                  </p>
+                </div>
+              ))}
+              {(!data.courses || data.courses.length === 0) && (
+                <div className="text-xs text-muted-foreground">
+                  <p className="font-semibold text-foreground truncate font-body">
+                    {data.institution ?? "Not specified"}
+                  </p>
+                  <p className="font-body">
+                    Course: <span className="font-semibold text-foreground">{data.courseTitle ?? "Not specified"}</span>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Column 3: Reimbursement & Documents */}
+          <div className="space-y-2">
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                Total Reimbursement
+              </p>
+              <div className="space-y-0.5 text-xs text-muted-foreground font-body">
+                <p>
+                  Tuition: <span className="font-semibold text-foreground">${(data.courses?.reduce((sum, c) => sum + c.amount, 0) ?? data.amount ?? 320).toLocaleString()}</span>
+                </p>
+                <p>
+                  Credits: <span className="font-semibold text-foreground">{data.courses?.reduce((sum, c) => sum + c.credits, 0) ?? data.credits ?? 6} credits</span>
+                </p>
               </div>
-            )}
+            </div>
+            <div className="pt-2 border-t border-border/60">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                Documents ({uploads.filter((u) => u.status === "complete").length} verified)
+              </p>
+              {uploads.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No documents uploaded</p>
+              ) : (
+                <div className="space-y-0.5 mt-0.5">
+                  {uploads.map((u) => (
+                    <div key={u.id} className="flex items-center gap-1.5 text-[10px] text-foreground">
+                      {u.status === "complete" ? (
+                        <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                      ) : (
+                        <Loader2 className="w-3 h-3 animate-spin text-primary flex-shrink-0" />
+                      )}
+                      <span className="truncate max-w-[150px]">{u.fileName}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="pt-5 space-y-4">
+      {/* Checkboxes Area */}
+      <Card className="border-primary/20 bg-primary/5 shadow-none rounded-lg">
+        <CardContent className="p-3 space-y-2.5">
           <div className="flex items-start gap-3">
             <Checkbox
               id="service-agreement"
               checked={agreed}
               onCheckedChange={(v) => onAgreedChange(Boolean(v))}
               data-ocid="apply.review.service_agreement_checkbox"
+              className="mt-0.5"
             />
             <Label
               htmlFor="service-agreement"
-              className="text-sm leading-relaxed cursor-pointer font-bold text-foreground"
+              className="text-xs leading-normal cursor-pointer font-bold text-foreground text-left"
             >
               I agree to the Service Agreement requiring 2 years of continued employment (or completion of 18 credits) at Montefiore Health System following reimbursement approval. Failure to comply may result in repayment.
             </Label>
@@ -1216,10 +1224,11 @@ function Step8Review({
               checked={conductAgreed}
               onCheckedChange={(v) => onConductAgreedChange(Boolean(v))}
               data-ocid="apply.review.conduct_checkbox"
+              className="mt-0.5"
             />
             <Label
               htmlFor="code-of-conduct"
-              className="text-sm leading-relaxed cursor-pointer font-medium text-foreground"
+              className="text-xs leading-normal cursor-pointer font-medium text-foreground text-left"
             >
               I certify that I have read and agree to comply with the Montefiore Health System Code of Conduct in connection with my participation in this educational reimbursement program.
             </Label>
@@ -1230,15 +1239,13 @@ function Step8Review({
               checked={certified}
               onCheckedChange={(v) => onCertifiedChange(Boolean(v))}
               data-ocid="apply.review.certification_checkbox"
+              className="mt-0.5"
             />
             <Label
               htmlFor="certification"
-              className="text-sm leading-relaxed cursor-pointer"
+              className="text-xs leading-normal cursor-pointer text-left"
             >
-              I certify that all information provided in this application is
-              accurate and complete. I understand that false or misleading
-              information may result in denial of benefits and disciplinary
-              action.
+              I certify that all information provided in this application is accurate and complete. I understand that false or misleading information may result in denial of benefits and disciplinary action.
             </Label>
           </div>
         </CardContent>
@@ -1268,96 +1275,96 @@ function Step9Success() {
   const TRACKING_ID = "MTRA-2026-0041";
 
   return (
-    <div className="space-y-8 text-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative w-20 h-20">
+    <div className="space-y-4 text-center">
+      <div className="flex flex-col items-center gap-2.5">
+        <div className="relative w-14 h-14">
           <div className="absolute inset-0 rounded-full bg-emerald-100 dark:bg-emerald-950/40 animate-ping opacity-30" />
-          <div className="relative w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-950/40 border-2 border-emerald-400 flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+          <div className="relative w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/40 border-2 border-emerald-400 flex items-center justify-center">
+            <CheckCircle2 className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
         <div>
-          <h2 className="text-2xl font-bold font-display text-foreground">
+          <h2 className="text-lg font-bold font-display text-foreground">
             Application Submitted!
           </h2>
-          <p className="text-muted-foreground mt-1">
-            Your reimbursement application has been received and is being
-            processed.
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Your reimbursement application has been received and is being processed.
           </p>
         </div>
       </div>
 
-      <Card className="max-w-md mx-auto border-primary/20 bg-primary/5">
-        <CardContent className="pt-5 pb-5">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+      <Card className="max-w-xs mx-auto border border-primary/20 bg-primary/5 shadow-none rounded-lg">
+        <CardContent className="py-2.5 px-4">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">
             Tracking ID
           </p>
           <p
-            className="text-2xl font-bold font-mono text-primary"
+            className="text-xl font-bold font-mono text-primary leading-none"
             data-ocid="apply.success.tracking_id"
           >
             {TRACKING_ID}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] text-muted-foreground mt-0.5">
             Save this ID to track your application status
           </p>
         </CardContent>
       </Card>
 
-      <div className="max-w-md mx-auto text-left space-y-1">
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-center">
+      <div className="max-w-xs mx-auto text-left space-y-1">
+        <h3 className="text-xs font-bold text-foreground mb-2 text-center uppercase tracking-wide">
           What Happens Next
         </h3>
         {SUCCESS_STEPS.map((step, idx) => (
           <div
             key={step.label}
-            className="flex items-start gap-3"
+            className="flex items-start gap-2.5"
             data-ocid={`apply.success.timeline.${idx + 1}`}
           >
             <div className="flex flex-col items-center">
               <div
                 className={[
-                  "w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0",
+                  "w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0",
                   step.done
                     ? "bg-emerald-500 border-emerald-500"
                     : "bg-card border-border",
                 ].join(" ")}
               >
                 {step.done ? (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
+                  <CheckCircle2 className="w-3 h-3 text-white" />
                 ) : (
-                  <span className="text-xs font-bold text-muted-foreground">
+                  <span className="text-[9px] font-bold text-muted-foreground">
                     {idx + 1}
                   </span>
                 )}
               </div>
               {idx < SUCCESS_STEPS.length - 1 && (
-                <div className="w-0.5 h-8 bg-border" />
+                <div className="w-0.5 h-4 bg-border" />
               )}
             </div>
-            <div className="pt-0.5 pb-4">
-              <p className="text-sm font-semibold text-foreground">
+            <div className="pt-0.5 pb-1.5">
+              <p className="text-xs font-semibold text-foreground leading-none">
                 {step.label}
               </p>
-              <p className="text-xs text-muted-foreground">{step.detail}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-none">{step.detail}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
         <Link href="/applications">
-          <Button data-ocid="apply.success.view_applications_button">
+          <Button data-ocid="apply.success.view_applications_button" size="sm" className="h-8 text-xs">
             View My Applications
           </Button>
         </Link>
         <Button
           type="button"
           variant="outline"
-          className="gap-2"
+          size="sm"
+          className="gap-2 h-8 text-xs"
           data-ocid="apply.success.download_button"
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-3.5 h-3.5" />
           Download Confirmation
         </Button>
       </div>
@@ -1440,6 +1447,11 @@ export function ApplicationWizard({ userRole }: { userRole: string }) {
       case 2:
         return infoCorrect === "yes";
       case 3:
+        if (wizardData.courses && wizardData.courses.length > 0) {
+          return wizardData.courses.every(
+            (c) => c.courseTitle.trim() !== "" && c.institution.trim() !== "" && c.credits > 0 && c.amount >= 0
+          );
+        }
         return Boolean(wizardData.institution && wizardData.courseTitle && (wizardData.amount ?? 0) > 0);
       case 4:
         return true;
@@ -1463,7 +1475,7 @@ export function ApplicationWizard({ userRole }: { userRole: string }) {
   };
 
   const getNextLabel = (): string | null => {
-    if (wizardStep === 5) return "Submit Application";
+    if (wizardStep === 5) return "Submit application";
     if (wizardStep === 6) return null;
     return "Continue";
   };

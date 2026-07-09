@@ -1,14 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import AIAssistant from "@/components/landing/AIAssistant";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function LandingPage() {
-  const [isBotOpen, setIsBotOpen] = useState(true);
-
   return (
     <main className="flex flex-col min-h-screen bg-gradient-mesh overflow-hidden relative">
       {/* Main Content Section */}
@@ -46,8 +42,6 @@ export default function LandingPage() {
            </div>
         </div>
       </div>
-
-      <AIAssistant isOpen={isBotOpen} setIsOpen={setIsBotOpen} />
       
       <FooterDisclaimer />
     </main>

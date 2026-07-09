@@ -14,11 +14,12 @@ export type ApplicationStatus =
   | "PendingApproval"
   | "Approved"
   | "Rejected"
-  | "Escalated";
+  | "Escalated"
+  | "Expired";
 
 export type SlaStatus = "OnTrack" | "AtRisk" | "Overdue";
 
-export type ApprovalStatus = "Pending" | "Approved" | "Rejected" | "Escalated";
+export type ApprovalStatus = "Pending" | "Approved" | "Rejected" | "Escalated" | "Expired";
 
 export type UserRole = "employee" | "manager" | "hr" | "admin";
 
@@ -169,6 +170,21 @@ export interface AuthUser {
   avatar?: string;
 }
 
+export interface CourseEntry {
+  id: string;
+  courseTitle: string;
+  courseCode?: string;
+  institution: string;
+  credits: number;
+  amount: number;
+  startDate?: string;
+  endDate?: string;
+  term?: string;
+  level?: string;
+  creditType?: string;
+  gradeReceived?: string; // 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'In Progress', 'Enrolled'
+}
+
 export interface WizardData {
   programType?: ProgramType;
   eligibilityChecked?: boolean;
@@ -183,6 +199,7 @@ export interface WizardData {
   term?: string;
   amount?: number;
   credits?: number;
+  courses?: CourseEntry[];
   documents?: Document[];
   aiGapReport?: {
     missingDocuments: string[];
@@ -248,4 +265,35 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   isProactive?: boolean;
+}
+
+export interface SupportCaseMessage {
+  id: string;
+  senderName: string;
+  senderRole: "employee" | "manager" | "hr" | "system";
+  message: string;
+  timestamp: string;
+  isInternal?: boolean;
+}
+
+export interface SupportCase {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  linkedAppId?: string;
+  linkedAppProgram?: string;
+  linkedAppDate?: string;
+  linkedAppStatus?: string;
+  subject: string;
+  category: "Document Issue" | "Eligibility Question" | "Payment Query" | "Service Agreement" | "Technical Issue" | "Other";
+  description: string;
+  status: "Open" | "In Progress" | "Resolved" | "Closed";
+  createdDate: string;
+  lastUpdated: string;
+  assignedTo: string;
+  messages: SupportCaseMessage[];
+  attachments?: string[];
+  resolutionNotes?: string;
+  reopenedFlag?: boolean;
+  reopenedDate?: string;
 }

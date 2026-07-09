@@ -105,9 +105,9 @@ export default function ApprovalsPage() {
         { label: "Approvals" },
       ]}
     >
-      <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto bg-muted/10 min-h-full" data-ocid="approvals.page">
+      <div className="p-4 space-y-4 max-w-5xl mx-auto bg-muted/10 min-h-full" data-ocid="approvals.page">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold font-display text-foreground">
+          <h1 className="text-xl font-bold font-display text-foreground">
             Manager Approvals
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground mt-1">
@@ -136,11 +136,11 @@ export default function ApprovalsPage() {
                 >
                   <CardContent className="p-0 flex flex-col">
                     {/* Top Row: Basic Info */}
-                    <div className="p-5 flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="py-3 px-4 flex flex-col md:flex-row md:items-start justify-between gap-3">
                       <div className="flex-1">
-                        <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                               <User className="w-4 h-4" />
                             </div>
                             <div>
@@ -192,8 +192,8 @@ export default function ApprovalsPage() {
                               Approval Status
                             </p>
                             {isSuspended ? (
-                              <Badge className="bg-destructive/10 text-destructive border-transparent text-[8px] font-bold h-4 px-1">
-                                Suspended (Past Due)
+                              <Badge className="bg-amber-100 text-amber-800 border-transparent text-[8px] font-bold h-4 px-1 font-body">
+                                Escalated (Past Due)
                               </Badge>
                             ) : actionResult ? (
                               <Badge className={`text-[8px] font-bold h-4 px-1 ${
@@ -209,14 +209,14 @@ export default function ApprovalsPage() {
                           </div>
                         </div>
 
-                        {/* Suspension Warning Alert */}
+                        {/* Escalation Warning Alert */}
                         {isSuspended && (
-                          <div className="mt-4 p-3 bg-destructive/5 border border-destructive/10 rounded-xl flex items-start gap-2 text-destructive">
-                            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                          <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2 text-amber-600">
+                            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
                             <div>
-                              <p className="text-[11px] font-bold uppercase tracking-wide">Approval Window Expired</p>
-                              <p className="text-[10px] text-destructive/80 leading-relaxed mt-0.5">
-                                This request has passed the required manager approval due date ({formatDate(approval.dueDate)}) and has been suspended. Actions are disabled. Please contact the HR Benefits Specialist to reactivate.
+                              <p className="text-[11px] font-bold uppercase tracking-wide font-body">Escalated to Next Approver</p>
+                              <p className="text-[10px] text-amber-700 leading-relaxed mt-0.5 font-body">
+                                This request reached its due date ({formatDate(approval.dueDate)}) without a manager decision and was auto-escalated to the next approver. Actions are read-only.
                               </p>
                             </div>
                           </div>
@@ -240,11 +240,11 @@ export default function ApprovalsPage() {
                       </div>
 
                       {/* Right actions sidebar (Approve, Reject, View Details) */}
-                      <div className="border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-5 flex flex-col justify-center gap-2.5 w-full md:w-48 flex-shrink-0">
+                      <div className="border-t md:border-t-0 md:border-l border-border pt-3 md:pt-0 md:pl-4 flex flex-col justify-center gap-2 w-full md:w-48 flex-shrink-0">
                         <Button
                           onClick={() => handleApprove(approval.id, approval.employeeName, approval.amount)}
                           disabled={isSuspended || !!actionResult}
-                          className="w-full h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm text-xs font-bold"
+                          className="w-full h-8 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm text-xs font-bold"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           Approve
@@ -253,7 +253,7 @@ export default function ApprovalsPage() {
                           variant="outline"
                           onClick={() => handleReject(approval.id, approval.employeeName)}
                           disabled={isSuspended || !!actionResult}
-                          className="w-full h-9 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/20 text-xs font-bold"
+                          className="w-full h-8 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/20 text-xs font-bold"
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           Reject
@@ -272,9 +272,9 @@ export default function ApprovalsPage() {
 
                     {/* Detailed Section (Do not show by default; only show when expanded) */}
                     {isExpanded && (
-                      <div className="px-5 pb-5 border-t border-border bg-muted/10 space-y-5 animate-in fade-in duration-200">
+                      <div className="px-4 pb-3 pt-3 border-t border-border bg-muted/10 space-y-3 animate-in fade-in duration-200">
                         {/* Course & Application Details */}
-                        <div className="pt-4 grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div className="space-y-1">
                             <h4 className="text-[9px] font-bold text-muted-foreground uppercase">Institution</h4>
                             <p className="text-xs font-bold text-foreground">{approval.institution}</p>
@@ -290,7 +290,7 @@ export default function ApprovalsPage() {
                         </div>
 
                         {/* AI Summary details */}
-                        <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 space-y-1.5">
+                        <div className="py-2.5 px-3 rounded-lg bg-primary/5 border border-primary/10 space-y-1">
                           <div className="flex items-center gap-1.5 text-primary">
                             <Brain className="w-3.5 h-3.5" />
                             <span className="text-[10px] font-bold uppercase tracking-wider">AI Policy Analysis Summary</span>
@@ -305,7 +305,7 @@ export default function ApprovalsPage() {
                           <h4 className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
                             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Approver Routing Verification
                           </h4>
-                          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-3.5 rounded-xl border border-border bg-card text-xs">
+                          <div className="flex flex-col md:flex-row items-start md:items-center gap-2 p-2.5 rounded-lg border border-border bg-card text-xs">
                             <div className="flex items-center gap-1.5">
                               <span className="w-2 h-2 rounded-full bg-emerald-500" />
                               <span className="font-semibold">Internal Medicine Nursing Dept</span>
@@ -325,7 +325,7 @@ export default function ApprovalsPage() {
                         </div>
 
                         {/* History Log / Audit Trail */}
-                        <div className="space-y-2 border-t border-border pt-4">
+                        <div className="space-y-2 border-t border-border pt-2">
                           <h4 className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Application Audit History</h4>
                           <div className="relative pl-4 space-y-3.5 border-l border-border/80 ml-2 pt-2">
                             <div className="relative">

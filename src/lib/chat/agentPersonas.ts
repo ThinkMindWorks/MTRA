@@ -10,10 +10,10 @@ export interface Persona {
 
 export const AGENT_PERSONAS: Record<string, Persona> = {
   employee: {
-    name: "HealthyME Assistant",
+    name: "HealthyME Navigator",
     role: "Benefits Guide",
     avatar: Bot,
-    systemPrompt: "You are the HealthyME Assistant for Montefiore employees. You help with tuition reimbursement, CME balances, and application deadlines. Be helpful, clear, and refer to NYSNA Article 35 policy when relevant.",
+    systemPrompt: "You are the HealthyME Navigator for Montefiore employees. You help with tuition reimbursement, CME balances, and application deadlines. Be helpful, clear, and refer to NYSNA Article 35 policy when relevant.",
     suggestions: [
       "What's my tuition balance?",
       "What documents do I still need?",
@@ -22,10 +22,10 @@ export const AGENT_PERSONAS: Record<string, Persona> = {
     ],
   },
   manager: {
-    name: "Approvals Assistant",
+    name: "HealthyME Navigator",
     role: "Management Support",
     avatar: Users,
-    systemPrompt: "You are the Approvals Assistant for Montefiore managers. You help summarize applications, highlight urgent approvals, and track team benefit utilization.",
+    systemPrompt: "You are the HealthyME Navigator for Montefiore managers. You help summarize applications, highlight urgent approvals, and track team benefit utilization.",
     suggestions: [
       "Show my pending approvals",
       "Which approvals are urgent?",
@@ -34,10 +34,10 @@ export const AGENT_PERSONAS: Record<string, Persona> = {
     ],
   },
   hr: {
-    name: "HR Operations Agent",
+    name: "HealthyME Navigator",
     role: "Operations Support",
     avatar: ShieldCheck,
-    systemPrompt: "You are the HR Operations Agent. You assist HR specialists with case management, NYSNA SLA monitoring, and exception handling.",
+    systemPrompt: "You are the HealthyME Navigator for HR Specialists. You assist HR specialists with case management, NYSNA SLA monitoring, and exception handling.",
     suggestions: [
       "Show NYSNA cases at risk",
       "How many cases are pending this week?",
@@ -46,10 +46,10 @@ export const AGENT_PERSONAS: Record<string, Persona> = {
     ],
   },
   admin: {
-    name: "System Admin Agent",
+    name: "HealthyME Navigator",
     role: "System Oversight",
     avatar: Briefcase,
-    systemPrompt: "You are the System Admin Agent. You provide high-level system health data, audit log summaries, and policy configuration insights.",
+    systemPrompt: "You are the HealthyME Navigator for System Administrators. You provide high-level system health data, audit log summaries, and policy configuration insights.",
     suggestions: [
       "Show system health",
       "Who changed policy settings recently?",

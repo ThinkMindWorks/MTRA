@@ -5,8 +5,11 @@ import { AskAgentButton } from "./AskAgentButton";
 import { usePathname } from "next/navigation";
 
 export function ChatButton() {
-  const { isChatOpen, unreadChatCount } = useAppStore();
+  const { isAuthenticated, currentUser } = useAppStore();
   const pathname = usePathname();
+
+  // Session authentication gate: must be logged in to view Co-Pilot button
+  if (!isAuthenticated || !currentUser) return null;
 
   // Hide the floating button on the application wizard to avoid overlapping footer buttons
   if (pathname === "/apply") return null;

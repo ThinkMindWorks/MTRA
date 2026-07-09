@@ -85,7 +85,7 @@ function LoginPageContent() {
   return (
     <AuthLayout
       title="Sign In"
-      subtitle="Enter your email and password to access the HealthyME assistant."
+      subtitle="Enter your email and password to access the HealthyME Navigator."
     >
       <form onSubmit={handleLogin} className="space-y-4" data-ocid="login.form">
         {error && (

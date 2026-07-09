@@ -15,7 +15,7 @@ export function DashboardChat() {
           <div className="w-5 h-5 rounded-md bg-brand-lightblue flex items-center justify-center flex-shrink-0 border border-brand-lightblue2/30">
             <Sparkles className="w-3 h-3 text-brand-teal" />
           </div>
-          HealthyME AI Assistant
+          HealthyME Navigator
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-4">
@@ -30,9 +30,10 @@ export function DashboardChat() {
         </div>
         <Button 
           onClick={() => setIsChatOpen(true)}
+          title="Open HealthyME Navigator"
           className="w-full gap-2 shadow-md hover:shadow-primary/20 transition-all"
         >
-          Open Chat <ArrowRight className="w-4 h-4" />
+          Open HealthyME Navigator <ArrowRight className="w-4 h-4" />
         </Button>
       </CardContent>
     </Card>

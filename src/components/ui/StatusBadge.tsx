@@ -40,6 +40,11 @@ const APP_STATUS_CONFIG: Record<
     className:
       "bg-brand-grey text-brand-black border-brand-grey hover:bg-brand-grey",
   },
+  Expired: {
+    label: "Escalated",
+    className:
+      "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100/80",
+  },
 };
 
 const SLA_STATUS_CONFIG: Record<
@@ -87,6 +92,11 @@ const APPROVAL_STATUS_CONFIG: Record<
     className:
       "bg-brand-grey text-brand-black border-brand-grey hover:bg-brand-grey",
   },
+  Expired: {
+    label: "Escalated",
+    className:
+      "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100/80",
+  },
 };
 
 interface StatusBadgeProps {
@@ -94,6 +104,7 @@ interface StatusBadgeProps {
   type?: "application" | "sla" | "approval";
   size?: "sm" | "md";
   className?: string;
+  isHROps?: boolean;
 }
 
 export function StatusBadge({
@@ -101,6 +112,7 @@ export function StatusBadge({
   type = "application",
   size = "md",
   className,
+  isHROps = false,
 }: StatusBadgeProps) {
   let config: { label: string; className: string } | undefined;
   if (type === "sla") config = SLA_STATUS_CONFIG[status as SlaStatus];
@@ -109,6 +121,8 @@ export function StatusBadge({
   else config = APP_STATUS_CONFIG[status as ApplicationStatus];
 
   if (!config) return null;
+
+  const labelText = status === "Expired" && isHROps ? "Timed Out — Escalated" : config.label;
 
   return (
     <Badge
@@ -120,7 +134,7 @@ export function StatusBadge({
         className,
       )}
     >
-      {config.label}
+      {labelText}
     </Badge>
   );
 }

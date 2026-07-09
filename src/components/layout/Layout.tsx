@@ -15,6 +15,7 @@ import {
 import { mockNotifications } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/appStore";
+import { LogoLockup } from "@/components/ui/LogoLockup";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -39,8 +40,10 @@ import {
   Trophy,
   User,
   Zap,
+  Wallet,
   Lock,
   CreditCard,
+  MessageSquare,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { ChatButton } from "@/components/chat/ChatButton";
@@ -59,26 +62,26 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Overview", href: "/", icon: LayoutDashboard, roles: ["employee", "hr", "admin"] },
   { label: "Apply Now", href: "/apply", icon: FilePlus, roles: ["employee"] },
-  { label: "My Applications", href: "/applications", icon: FolderOpen, roles: ["employee"] },
-  { label: "HR Operations", href: "/hr-ops", icon: Settings2, roles: ["hr", "admin"] },
-  { label: "Scholarship Review", href: "/scholarship", icon: Trophy, roles: ["hr", "admin"] },
-  { label: "Service Agreements", href: "/service-agreements", icon: ShieldAlert, roles: ["hr", "admin"] },
-  { label: "Compliance Hub", href: "/compliance", icon: ShieldCheck, roles: ["hr", "admin"] },
-  { label: "Payroll Feed", href: "/payroll", icon: CreditCard, roles: ["hr", "admin"] },
-  {
-    label: "Case Management",
-    href: "/cases/case-001",
-    icon: FolderOpen,
-    roles: ["hr", "admin"],
-  },
+  { label: "My Applications", href: "/applications", icon: FolderOpen, roles: ["employee", "hr", "admin"] },
   {
     label: "Manager Approvals",
     href: "/approvals",
     icon: CheckSquare,
     roles: ["manager", "hr", "admin"],
   },
-  { label: "Policy Admin", href: "/admin/policy", icon: Settings, roles: ["hr", "admin"] },
-  { label: "Application Status", href: "/notifications", icon: Bell },
+  { label: "Application Status", href: "/notifications", icon: Bell, roles: ["employee", "hr", "admin"] },
+  { label: "HR Operations", href: "/hr-ops", icon: Settings2, roles: ["hr", "admin"] },
+  { label: "Scholarship Review", href: "/scholarship", icon: Trophy, roles: ["hr", "admin"] },
+  { label: "Compliance Hub", href: "/compliance", icon: ShieldCheck, roles: ["hr", "admin"] },
+  { label: "Payroll Feed", href: "/payroll", icon: CreditCard, roles: ["admin"] },
+  {
+    label: "Case Management",
+    href: "/cases/case-001",
+    icon: FolderOpen,
+    roles: ["hr", "admin"],
+  },
+  { label: "Policy Admin", href: "/admin/policy", icon: Settings, roles: ["admin"] },
+  { label: "Support Cases", href: "/support", icon: MessageSquare, roles: ["employee", "manager", "hr", "admin"] },
 ];
 
 interface LayoutProps {
@@ -228,11 +231,7 @@ export function Layout({
           </button>
 
           {/* Logo brand lockup */}
-          <div className="flex items-center gap-3">
-            <img src="/assets/images/logo_healthy_me.png" alt="HealthyME" className="h-8 object-contain shrink-0" />
-            <div className="w-[1px] h-6 bg-border shrink-0" />
-            <img src="/assets/images/logo_life_hr.png" alt="Life@Montefiore HR" className="h-8 object-contain shrink-0" />
-          </div>
+          <LogoLockup />
         </div>
 
         {/* Right actions */}
@@ -244,6 +243,7 @@ export function Layout({
             className="w-9 h-9 relative text-muted-foreground hover:text-foreground"
             aria-label={`Notifications (${unreadCount} unread)`}
             data-ocid="header.notifications_button"
+            onClick={() => router.push("/notifications")}
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
@@ -309,7 +309,24 @@ export function Layout({
         </div>
       </header>
 
-
+      {/* Welcome Banner (Overview page only) */}
+      {pathname === "/" && (
+        <div 
+          className="w-full bg-brand-mesh flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 sm:px-12 py-6 sm:py-8 flex-shrink-0 border-b border-border"
+          data-ocid="layout.welcome_banner"
+        >
+          <h1 className="text-white font-display font-medium text-xl sm:text-2xl md:text-3xl tracking-wide text-left">
+            Welcome to the HealthyME Tuition Portal
+          </h1>
+          <Button
+            onClick={() => router.push("/apply")}
+            className="rounded-full bg-white text-[#003769] hover:bg-white/95 font-bold px-6 py-2.5 sm:py-3.5 shadow-sm shrink-0 w-full sm:w-auto text-center justify-center"
+            data-ocid="layout.quick_apply_button"
+          >
+            Apply Now
+          </Button>
+        </div>
+      )}
 
       {/* Main Body below Header */}
       <div className={cn(

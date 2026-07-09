@@ -31,14 +31,16 @@ import {
   Search,
   SlidersHorizontal,
 } from "lucide-react";
+import { useAppStore } from "@/store/appStore";
 import { useState } from "react";
 
 export default function ApplicationsPage() {
   const router = useRouter();
+  const { currentUser } = useAppStore();
   const [search, setSearch] = useState("");
 
   // Current employee (Maria Santos in demo)
-  const currentEmployee = mockEmployees[0];
+  const currentEmployee = mockEmployees.find((e) => e.employeeId === currentUser?.employeeId) || mockEmployees[0];
   const isNYSNA = currentEmployee.isNYSNA === true;
 
   // Find this employee's active service agreement (NYSNA only)
@@ -48,10 +50,15 @@ export default function ApplicationsPage() {
       ) ?? null
     : null;
 
-  const filteredApps = mockApplications.filter(
+  let userApps = mockApplications;
+  if (currentUser?.role === "employee") {
+    userApps = mockApplications.filter((app) => app.employeeId === currentEmployee.id);
+  }
+
+  const filteredApps = userApps.filter(
     (app) =>
       app.institution.toLowerCase().includes(search.toLowerCase()) ||
-      app.courseTitle.toLowerCase().includes(search.toLowerCase()) ||
+      app.courseTitle?.toLowerCase().includes(search.toLowerCase()) ||
       app.id.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -102,7 +109,7 @@ export default function ApplicationsPage() {
           </Button>
         </div>
 
-        {/* â”€â”€ NYSNA Service Agreement Panel (NYSNA nurses only) â”€â”€ */}
+        {/* NYSNA Service Agreement Panel (NYSNA nurses only) */}
         {isNYSNA && serviceAgreement && (
           <Card
             className="border-primary/25 bg-primary/5 shadow-sm"
@@ -176,14 +183,14 @@ export default function ApplicationsPage() {
           </Card>
         )}
 
-        {/* â”€â”€ Applications Table â”€â”€ */}
+        {/* Applications Table */}
         <Card className="border-border shadow-sm overflow-hidden">
           <CardHeader className="pb-3 border-b border-border bg-muted/30">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="relative w-full md:w-96">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search applicationsâ€¦"
+                  placeholder="Search applications..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 h-9 bg-background"
