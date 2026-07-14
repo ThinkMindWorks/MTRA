@@ -120,8 +120,8 @@ const MOCK_SUPPORT_CASES: SupportCase[] = [
 export const useAppStore = create<StoreState>()(
   persist(
     (set) => ({
-      currentUser: null,
-      isAuthenticated: false,
+      currentUser: mockAuthUsers[0],
+      isAuthenticated: true,
 
       loginAs: (user) => set({ currentUser: user, isAuthenticated: true }),
       logout: () => set({ currentUser: null, isAuthenticated: false }),
@@ -175,7 +175,7 @@ export const useAppStore = create<StoreState>()(
         })),
     }),
     {
-      name: "mtra-storage",
+      name: "mtra-storage-v2",
       onRehydrateStorage: (state) => {
         return () => state.setHasHydrated(true);
       },

@@ -124,10 +124,10 @@ export function Layout({
       }
 
       // Find current item's required roles
-      const activeItem = NAV_ITEMS.find((item) => 
+      const activeItem = NAV_ITEMS.find((item) =>
         pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href + "/"))
       );
-      
+
       if (activeItem?.roles) {
         if (!currentUser || !activeItem.roles.includes(currentUser.role)) {
           console.warn("Unauthorized access attempt. Redirecting...");
@@ -311,8 +311,8 @@ export function Layout({
 
       {/* Welcome Banner (Overview page only) */}
       {pathname === "/" && (
-        <div 
-          className="w-full bg-brand-mesh flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 sm:px-12 py-6 sm:py-8 flex-shrink-0 border-b border-border"
+        <div
+          className="bg-[radial-gradient(ellipse_28%_260%_at_6%_55%,#1d6b74_0%,transparent_70%),radial-gradient(ellipse_30%_240%_at_22%_65%,#2d8a8f_0%,transparent_65%),radial-gradient(ellipse_34%_260%_at_58%_60%,#6fb0d6_0%,transparent_60%),radial-gradient(ellipse_28%_240%_at_94%_55%,#b9d3e6_0%,transparent_60%),linear-gradient(90deg,#1d6b74,#429ea6,#77b0d9,#d9e8f2)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 sm:px-12 py-6 sm:py-8 flex-shrink-0 border-b border-border"
           data-ocid="layout.welcome_banner"
         >
           <h1 className="text-white font-display font-medium text-xl sm:text-2xl md:text-3xl tracking-wide text-left">
@@ -335,7 +335,7 @@ export function Layout({
       )}>
         {/* Sidebar Overlay for mobile */}
         {!sidebarCollapsed && isMobile && (
-          <div 
+          <div
             className="fixed inset-0 z-20 bg-background/80 backdrop-blur-sm lg:hidden mt-[176px]"
             onClick={toggleSidebar}
           />
@@ -359,7 +359,7 @@ export function Layout({
                 pathname === item.href ||
                 (item.href !== "/" &&
                   (pathname?.startsWith(item.href + "/") ||
-                   (item.href.split("/")[1] === pathname?.split("/")[1])));
+                    (item.href.split("/")[1] === pathname?.split("/")[1])));
               return (
                 <Link
                   key={item.href}
@@ -437,7 +437,7 @@ export function Layout({
             {pathname !== "/apply" && <FooterDisclaimer />}
           </div>
         </main>
-        
+
         {/* Global AI Chat Agent */}
         <ProactiveAlert />
         <ChatButton />
@@ -456,7 +456,7 @@ function FooterDisclaimer() {
           backgroundColor: "#F59E0B",
           color: "#003769",
           padding: "6px 12px",
-          fontFamily: '"Fakt", Arial, sans-serif',
+          fontFamily: 'Arial, sans-serif',
           fontWeight: 600,
         }}
       >
